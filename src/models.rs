@@ -18,14 +18,25 @@ pub struct NewBlogPost {
     pub avatar_url: String,
 }
 
+impl BlogPost {
+    pub fn empty() -> Self {
+        BlogPost {
+            text: String::from(""),
+            post_date: String::from(""),
+            user_name: String::from(""),
+            image_path: String::from(""),
+            avatar_path: String::from(""),
+        }
+    }
+}
 impl NewBlogPost {
-    pub fn to_db_model(self) -> BlogPost {
+    pub fn to_db_model(self, image_path: String, avatar_path: String) -> BlogPost {
         BlogPost {
             text: self.text,
-            post_date: "".to_string(),
-            user_name: "".to_string(),
-            image_path: "".to_string(),
-            avatar_path: "".to_string(),
+            post_date: "date".to_string(),
+            user_name: self.user_name,
+            image_path,
+            avatar_path,
         }
     }
 }

@@ -50,7 +50,7 @@
             </fieldset>
         </div>
         <br>
-        <button type="submit">Add Post</button>
+        <button type="submit">Submit New Post</button>
     </form>
     <h2>Posts Feed</h2>
     <div id="posts-root"></div>
@@ -66,7 +66,13 @@
             res.json().then((posts) => {
                 postsRoot.innerHTML = ''
                 posts.forEach((post) => {
-                    postsRoot.innerHTML += `<article>${post.text}</article>`
+                    postsRoot.innerHTML += `<article>
+                        <p>${post.text}<p>
+                        <p>${post.user_name}<p>
+                        <p>${post.image_path}<p>
+                        <p>${post.avatar_path}<p>
+                        <p>${post.post_date}<p>
+                    </article>`
                 })
             }).catch(() => postsRoot.innerHTML = `<b>Couldn't fetch posts.</b>`)
         }).catch(() => postsRoot.innerHTML = `<b>Couldn't fetch posts.</b>`)
@@ -75,16 +81,11 @@
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = new FormData(e.target);
-        const post = {};
-        ['text', 'image', 'user_name', 'avatar_url'].forEach((key) => post[key] = data.get(key))
-        // console.log(JSON.stringify(post))
-        console.log(post)
-        await fetch(`${apiHost}/api/posts`, {
+        fetch(`${apiHost}/api/posts`, {
             method: 'post',
-            body: JSON.stringify(post),
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            body: data,
+        }).then(() => {
+            fetchPosts()
         })
     })
 
