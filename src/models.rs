@@ -29,14 +29,3 @@ impl BlogPost {
         }
     }
 }
-impl NewBlogPost {
-    pub fn to_db_model(self, image_path: String, avatar_path: String) -> BlogPost {
-        BlogPost {
-            text: self.text,
-            post_date: "date".to_string(),
-            user_name: self.user_name,
-            image_path,
-            avatar_path,
-        }
-    }
-}

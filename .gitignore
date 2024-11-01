@@ -2,3 +2,4 @@
 /.idea
 blog.db
 /migrations
+/public/content
