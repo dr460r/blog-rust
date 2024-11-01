@@ -10,7 +10,7 @@ use axum::extract::Extension;
 use sqlx::{Pool, Sqlite, sqlite::SqlitePool};
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
-use crate::handlers::{create_new_post, get_all_posts, get_home_html};
+use crate::handlers::{create_new_post, get_all_posts};
 
 #[tokio::main]
 async fn main() {
@@ -38,6 +38,6 @@ async fn start_server(state: Arc<Pool<Sqlite>>) {
 }
 
 async fn db_connect() -> Result<Pool<Sqlite>, sqlx::Error> {
-    SqlitePool::connect("sqlite:blog.db").await
+    SqlitePool::connect("sqlite:database/blog.db").await
 }
 

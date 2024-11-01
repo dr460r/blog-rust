@@ -1,5 +1,5 @@
 /target
 /.idea
 blog.db
-/migrations
+/database
 /public/content
