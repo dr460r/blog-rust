@@ -4,29 +4,19 @@
     <meta charset="utf-8">
     <title>Blog</title>
     <style>
-        body {
-            margin: auto;
-            padding: 10px;
-            max-width: 700px;
-        }
-        label {
-            font-size: 0.8em;
-        }
-        article {
-            border: 1px solid grey;
-            margin: 5px 2px;
-            padding: 5px;
-        }
-        form > div {
-            display: flex;
-        }
-        form > div > fieldset {
-            flex-grow: 1;
-        }
-        input, textarea {
-            box-sizing: border-box;
-            width: 100%;
-        }
+        body { margin: auto; padding: 10px; max-width: 700px; }
+        label { font-size: 0.8em; }
+        article { border: 1px solid grey; margin: 5px 2px; padding: 5px; }
+        form > div { display: flex; }
+        form > div > fieldset { flex-grow: 1; }
+        input, textarea { box-sizing: border-box; width: 100%; }
+        article { display: flex; flex-direction: column; row-gap: 5px; }
+        article > div { display: flex; column-gap: 10px; }
+        img { border: 1px solid grey; }
+        img.post { height: 200px; }
+        img.avatar { height: 50px; }
+        article p { margin: 0; text-align: justify; }
+        div.date { font-size: 0.9em; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -54,7 +44,6 @@
     </form>
     <h2>Posts Feed</h2>
     <div id="posts-root"></div>
-    <a href="content/2024-10-15_00-23.png">Image</a>
 </body>
 <script>
     const apiHost = 'http://localhost:3000'
@@ -68,11 +57,17 @@
                 postsRoot.innerHTML = ''
                 posts.forEach((post) => {
                     postsRoot.innerHTML += `<article>
-                        <p>${post.text}<p>
-                        <p>${post.user_name}<p>
-                        <p>${post.image_path}<p>
-                        <p>${post.avatar_path}<p>
-                        <p>${post.post_date}<p>
+                        <div>
+                            <img class="avatar" src="content/${post.avatar_path}" alt="User Avatar Image">
+                            <div>
+                                <div class="name">${post.user_name}</div>
+                                <div class="date">${post.post_date}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <img class="post" src="content/${post.image_path}" alt="Blog Post Image">
+                            <p>${post.text}<p>
+                        </div>
                     </article>`
                 })
             }).catch(() => postsRoot.innerHTML = `<b>Couldn't fetch posts.</b>`)
