@@ -3,25 +3,90 @@
 <head>
     <meta charset="utf-8">
     <title>Blog</title>
+    <style>
+        body {
+            margin: auto;
+            padding: 10px;
+            max-width: 700px;
+        }
+        label {
+            font-size: 0.8em;
+        }
+        article {
+            border: 1px solid grey;
+            margin: 5px 2px;
+            padding: 5px;
+        }
+        form > div {
+            display: flex;
+        }
+        form > div > fieldset {
+            flex-grow: 1;
+        }
+        input, textarea {
+            box-sizing: border-box;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-    <h1>Home</h1>
-    <button onclick="fetchPosts()">Fetch</button>
+    <h1>Simple Rust Blog</h1>
+    <h2>Create New Post</h2>
+    <form id="form" enctype="multipart/form-data">
+        <div>
+            <fieldset>
+                <legend>User Data</legend>
+                <label for="user_name">Name</label> <br>
+                <input type="text" id="user_name" name="user_name" required> <br>
+                <label for="avatar_url">Avatar URL</label> <br>
+                <input type="text" id="avatar_url" name="avatar_url"> <br>
+            </fieldset>
+            <fieldset>
+                <legend>Post Data</legend>
+                <label for="image">Image</label> <br>
+                <input type="file" id="image" name="image" accept="image/*"> <br>
+                <label for="text">Content</label> <br>
+                <textarea id="text" name="text" rows="4" required></textarea> <br>
+            </fieldset>
+        </div>
+        <br>
+        <button type="submit">Add Post</button>
+    </form>
+    <h2>Posts Feed</h2>
     <div id="posts-root"></div>
 </body>
 <script>
-    let postsRoot = document.getElementById('posts-root')
+    const apiHost = 'http://localhost:3000'
+    const postsRoot = document.getElementById('posts-root')
+    const form = document.getElementById('form')
+
     const fetchPosts = () => {
         postsRoot.innerHTML = '<b>Loading...</b>'
-        fetch('http://localhost:3000/api/posts').then((res) => {
+        fetch(`${apiHost}/api/posts`).then((res) => {
             res.json().then((posts) => {
                 postsRoot.innerHTML = ''
                 posts.forEach((post) => {
-                    postsRoot.innerHTML += `<div>${post.text}</div>`
+                    postsRoot.innerHTML += `<article>${post.text}</article>`
                 })
             }).catch(() => postsRoot.innerHTML = `<b>Couldn't fetch posts.</b>`)
         }).catch(() => postsRoot.innerHTML = `<b>Couldn't fetch posts.</b>`)
     }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(e.target);
+        const post = {};
+        ['text', 'image', 'user_name', 'avatar_url'].forEach((key) => post[key] = data.get(key))
+        // console.log(JSON.stringify(post))
+        console.log(post)
+        await fetch(`${apiHost}/api/posts`, {
+            method: 'post',
+            body: JSON.stringify(post),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+    })
 
     fetchPosts()
 </script>
