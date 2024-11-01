@@ -1,4 +1,3 @@
-pub const HOME_TEMPLATE: &str = r#"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,10 +5,9 @@ pub const HOME_TEMPLATE: &str = r#"
     <title>Blog</title>
 </head>
 <body>
-<h1>Home</h1>
-<button onclick="fetchPosts()">Fetch</button>
-<div id="posts-root">
-</div>
+    <h1>Home</h1>
+    <button onclick="fetchPosts()">Fetch</button>
+    <div id="posts-root"></div>
 </body>
 <script>
     let postsRoot = document.getElementById('posts-root')
@@ -28,4 +26,3 @@ pub const HOME_TEMPLATE: &str = r#"
     fetchPosts()
 </script>
 </html>
-"#;
