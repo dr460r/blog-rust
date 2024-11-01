@@ -1,23 +1,18 @@
 use std::sync::Arc;
-use std::fs;
+
+use tokio::fs::File;
 
 use axum::{
     Extension,
     Json,
-    response::Html,
     http::StatusCode,
 };
 
 use axum::extract::Multipart;
 
 use sqlx::{query_as, Pool, Sqlite};
-use crate::models::{BlogPost, NewBlogPost};
-
-pub async fn get_home_html(Extension(pool): Extension<Arc<Pool<Sqlite>>>) -> Html<String>  {
-    let file_content = fs::read_to_string("index.html")
-        .expect("Something went wrong reading the file");
-    Html(file_content)
-}
+use uuid::Uuid;
+use crate::models::{BlogPost};
 
 pub async fn get_all_posts(Extension(pool): Extension<Arc<Pool<Sqlite>>>) -> Json<Vec<BlogPost>> {
     let res = query_as
@@ -46,17 +41,23 @@ pub async fn create_new_post(
             .map(|ext| ext.to_string());
 
         let data = field.bytes().await.unwrap().clone();
+        let img_uuid = Uuid::new_v4().to_string();
+        let img_dir = "public/content";
 
         match name.as_str() {
             "image" => {
                 if data.len() > 0 {
                     // TODO: Save image to file from provided data
-                    bpost.image_path = file_ext.unwrap();
+                    let filename = format!("post_image_{}.{}", img_uuid, file_ext.unwrap());
+                    println!("{}", filename);
+                    bpost.image_path = format!("{}/{}", img_dir, filename);
                 }
             },
             "avatar_url" => {
                 // TODO: Download avatar from provided data
-                bpost.avatar_path = String::from_utf8(data.to_vec()).unwrap();
+                let filename = format!("avatar_image_{}", img_uuid);
+                println!("{}", filename);
+                bpost.avatar_path = format!("{}/{}", img_dir, filename);
             },
             "text" => {
                 bpost.text = String::from_utf8(data.to_vec()).unwrap();

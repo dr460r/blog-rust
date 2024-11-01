@@ -9,6 +9,7 @@ use axum::extract::Extension;
 
 use sqlx::{Pool, Sqlite, sqlite::SqlitePool};
 use tokio::net::TcpListener;
+use tower_http::services::ServeDir;
 use crate::handlers::{create_new_post, get_all_posts, get_home_html};
 
 #[tokio::main]
@@ -26,9 +27,10 @@ async fn main() {
 
 async fn start_server(state: Arc<Pool<Sqlite>>) {
     let app = Router::new()
-        .route("/home", get(get_home_html))
         .route( "/api/posts", get(get_all_posts))
         .route("/api/posts", post(create_new_post))
+        .nest_service("/home", ServeDir::new("public"))
+        .nest_service("/content", ServeDir::new("public/content"))
         .layer(Extension(state));
 
     let listener: TcpListener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
