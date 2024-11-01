@@ -67,7 +67,7 @@
                             <img class="avatar" src="content/${post.avatar_path}" alt="User Avatar Image">
                             <div>
                                 <div class="name">${post.user_name}</div>
-                                <div class="date">${post.post_date}</div>
+                                <div class="date">${new Date(post.post_date).toDateString()}</div>
                             </div>
                         </div>
                         <p>${post.text}<p>

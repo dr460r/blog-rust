@@ -11,6 +11,7 @@ use axum::{
 use axum::extract::Multipart;
 
 use sqlx::{query_as, Pool, Sqlite};
+use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
 use crate::models::{BlogPost};
 
@@ -47,17 +48,21 @@ pub async fn create_new_post(
         match name.as_str() {
             "image" => {
                 if data.len() > 0 {
-                    // TODO: Save image to file from provided data
                     let filename = format!("post_image_{}.{}", img_uuid, file_ext.unwrap());
-                    println!("{}", filename);
-                    bpost.image_path = format!("{}/{}", img_dir, filename);
+                    let filepath = format!("{}/{}", img_dir, filename);
+                    bpost.image_path = filename;
+
+                    let mut file = File::create(filepath).await.unwrap();
+                    file.write_all(&data).await.unwrap();
                 }
             },
             "avatar_url" => {
-                // TODO: Download avatar from provided data
                 let filename = format!("avatar_image_{}", img_uuid);
-                println!("{}", filename);
-                bpost.avatar_path = format!("{}/{}", img_dir, filename);
+                bpost.avatar_path = filename;
+
+                // let filepath = format!("{}/{}", img_dir, filename);
+                // let mut file = File::create(filepath).await.unwrap();
+                // file.write_all(&data).await.unwrap();
             },
             "text" => {
                 bpost.text = String::from_utf8(data.to_vec()).unwrap();
@@ -68,6 +73,7 @@ pub async fn create_new_post(
             _ => {}
         }
     }
+    bpost.post_date = chrono::Utc::now().to_rfc3339();
 
     let sql: &str = "INSERT INTO blog_posts (text, user_name, post_date, image_path, avatar_path) VALUES ($1, $2, $3, $4, $5)";
     let res = sqlx::query(&sql)
