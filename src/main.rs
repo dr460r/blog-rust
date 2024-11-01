@@ -2,11 +2,12 @@ mod models;
 mod handlers;
 
 use std::sync::Arc;
-use axum::{
-    routing::get,
-    Router,
-};
-use sqlx::{Pool, Sqlite};
+
+use axum::{Router, routing::get};
+use axum::routing::post;
+use axum::extract::Extension;
+
+use sqlx::{Pool, Sqlite, sqlite::SqlitePool};
 use tokio::net::TcpListener;
 use crate::handlers::{create_new_post, get_all_posts, get_home_html};
 
@@ -24,16 +25,17 @@ async fn main() {
 }
 
 async fn start_server(state: Arc<Pool<Sqlite>>) {
-    let app: Router = Router::new()
+    let app = Router::new()
         .route("/home", get(get_home_html))
-        .route( "/api/posts", get(get_all_posts).post(create_new_post))
-        .with_state(state);
+        .route( "/api/posts", get(get_all_posts))
+        .route("/api/posts", post(create_new_post))
+        .layer(Extension(state));
 
     let listener: TcpListener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
 async fn db_connect() -> Result<Pool<Sqlite>, sqlx::Error> {
-    sqlx::sqlite::SqlitePool::connect("sqlite:blog.db").await
+    SqlitePool::connect("sqlite:blog.db").await
 }
 
