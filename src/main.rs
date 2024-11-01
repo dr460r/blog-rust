@@ -38,6 +38,6 @@ async fn start_server(state: Arc<Pool<Sqlite>>) {
 }
 
 async fn db_connect() -> Result<Pool<Sqlite>, sqlx::Error> {
-    SqlitePool::connect("sqlite:database/blog.db").await
+    SqlitePool::connect("sqlite:database.db").await
 }
 

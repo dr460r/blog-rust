@@ -1,5 +1,6 @@
-/target
 /.idea
-blog.db
-/database
+/target
 /public/content
+database.db
+database.db-shm
+database.db-wal
