@@ -58,11 +58,19 @@ pub async fn create_new_post(
             },
             "avatar_url" => {
                 let filename = format!("avatar_image_{}", img_uuid);
+                let filepath = format!("{}/{}", img_dir, filename);
                 bpost.avatar_path = filename;
 
-                // let filepath = format!("{}/{}", img_dir, filename);
-                // let mut file = File::create(filepath).await.unwrap();
-                // file.write_all(&data).await.unwrap();
+                let url = String::from_utf8(data.to_vec()).unwrap();
+                let response = reqwest::get(url).await.unwrap();
+                if response.status().is_success() {
+                    let mut file = File::create(filepath).await.unwrap();
+                    let content = response.bytes().await.unwrap();
+                    file.write_all(&content).await.unwrap();
+                    println!("File downloaded successfully.");
+                } else {
+                    println!("Failed to download file: {}", response.status());
+                }
             },
             "text" => {
                 bpost.text = String::from_utf8(data.to_vec()).unwrap();
