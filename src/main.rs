@@ -12,6 +12,8 @@ use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
 use crate::handlers::{create_new_post, get_all_posts};
 
+const IMG_DIR: &str = "data/images";
+
 #[tokio::main]
 async fn main() {
     match db_connect().await {
@@ -30,7 +32,7 @@ async fn start_server(state: Arc<Pool<Sqlite>>) {
         .route( "/api/posts", get(get_all_posts))
         .route("/api/posts", post(create_new_post))
         .nest_service("/home", ServeDir::new("public"))
-        .nest_service("/content", ServeDir::new("public/content"))
+        .nest_service("/content", ServeDir::new(IMG_DIR))
         .layer(Extension(state));
 
     let listener: TcpListener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
@@ -38,6 +40,6 @@ async fn start_server(state: Arc<Pool<Sqlite>>) {
 }
 
 async fn db_connect() -> Result<Pool<Sqlite>, sqlx::Error> {
-    SqlitePool::connect("sqlite:database.db").await
+    SqlitePool::connect("sqlite:data/database.db").await
 }
 

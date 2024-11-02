@@ -13,6 +13,7 @@ use axum::extract::Multipart;
 use sqlx::{query_as, Pool, Sqlite};
 use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
+use crate::IMG_DIR;
 use crate::models::{BlogPost};
 
 pub async fn get_all_posts(Extension(pool): Extension<Arc<Pool<Sqlite>>>) -> Json<Vec<BlogPost>> {
@@ -33,7 +34,7 @@ pub async fn create_new_post(
 
     let mut bpost = BlogPost::empty();
 
-    while let Some(mut field) = multipart.next_field().await.unwrap() {
+    while let Some(field) = multipart.next_field().await.unwrap() {
         let name = field.name().unwrap().to_string();
 
         let file_ext = field
@@ -43,7 +44,7 @@ pub async fn create_new_post(
 
         let data = field.bytes().await.unwrap().clone();
         let img_uuid = Uuid::new_v4().to_string();
-        let img_dir = "public/content";
+        let img_dir = IMG_DIR;
 
         match name.as_str() {
             "image" => {
@@ -67,7 +68,6 @@ pub async fn create_new_post(
                     let mut file = File::create(filepath).await.unwrap();
                     let content = response.bytes().await.unwrap();
                     file.write_all(&content).await.unwrap();
-                    println!("File downloaded successfully.");
                 } else {
                     println!("Failed to download file: {}", response.status());
                 }
