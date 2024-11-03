@@ -28,24 +28,14 @@ RUN tree /build
 FROM alpine:3.18 AS final
 WORKDIR /app
 
-#COPY ./data /app/data_temp/
-
 COPY --from=build /build/blog /app/
 COPY --from=build /build/data /app/data/
 COPY --from=build /build/public /app/public/
 
-#RUN cp -r ./data_temp/* ./data/
-#RUN rm -r ./data_temp
-
 VOLUME "/app/data"
-#VOLUME "/app/data/images"
 
-RUN apk add --no-cache tree
-RUN tree .
-
-#RUN echo "#!/bin/sh\ncp -r ./data_temp/* ./data/ && ./blog" > run.sh
-#RUN chmod +x run.sh
+#RUN apk add --no-cache tree
+#RUN tree .
 
 EXPOSE 3000
-#CMD ["sh", "run.sh"]
 CMD ["./blog"]
