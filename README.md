@@ -1,3 +1,5 @@
+# Simple Rust Blog
+
 ## Run with Docker
 
 ### Get image
@@ -14,11 +16,9 @@ docker build . -t rust-blog
 
 ### Run container
 
-Port `3000` is the one that app listens on, so it needs to be bound to local port.
+Port `3000` is the one that app listens on, so it needs to be bound to local port. _Optionally_, to persist data you can create local volume and bind it to `/app/data` directory inside container.
 
-_Optionally_, to persist data you can create local volume and bind it to `/app/data` directory inside container.
-
-Example. Run container with `myvol` volume on port `80`:
+_Example_. Run container with added volume `myvol`, and listen on port `80`:
 ```sh
 docker run -v myvol:/app/data -p 80:3000 rust-blog
 ```
