@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Blog</title>
+    <link rel="icon" type="image/x-icon" href="/home/favicon.ico">
     <style>
         body { margin: auto; padding: 10px; max-width: 700px; background: #f9f9f9; }
         h1 { text-align: center; }
@@ -51,7 +52,7 @@
     <h2>Posts Feed</h2>
     <div id="posts-root"></div>
 </body>
-<script>
+<script defer>
     const apiHost = window.location.origin
     const postsRoot = document.getElementById('posts-root')
     const form = document.getElementById('form')
@@ -63,7 +64,7 @@
                 postsRoot.innerHTML = ''
                 posts.forEach((post) => {
                     postsRoot.innerHTML += `<article>
-                        <img class="post" src="content/${post.image_path}" alt="Blog Post Image">
+                        ${post.image_path ? `<img class="post" src="content/${post.image_path}" alt="Blog Post Image">` : ''}
                         <div>
                             <img class="avatar" src="content/${post.avatar_path}" alt="User Avatar Image">
                             <div>
@@ -87,8 +88,8 @@
         }).then(() => {
             fetchPosts()
         })
-    })
+    });
 
-    fetchPosts()
+    fetchPosts();
 </script>
 </html>

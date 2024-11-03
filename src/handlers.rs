@@ -53,8 +53,14 @@ pub async fn create_new_post(
                     let filepath = format!("{}/{}", img_dir, filename);
                     bpost.image_path = filename;
 
-                    let mut file = File::create(filepath).await.unwrap();
-                    file.write_all(&data).await.unwrap();
+                    match File::create(filepath).await {
+                        Ok(mut file) => match file.write_all(&data).await {
+                            Ok(_) => {},
+                            Err(_) => bpost.image_path = "".to_string(),
+                        },
+                        Err(_) => bpost.image_path = "".to_string(),
+                    }
+
                 }
             },
             "avatar_url" => {
@@ -63,14 +69,22 @@ pub async fn create_new_post(
                 bpost.avatar_path = filename;
 
                 let url = String::from_utf8(data.to_vec()).unwrap();
-                let response = reqwest::get(url).await.unwrap();
-                if response.status().is_success() {
-                    let mut file = File::create(filepath).await.unwrap();
-                    let content = response.bytes().await.unwrap();
-                    file.write_all(&content).await.unwrap();
-                } else {
-                    println!("Failed to download file: {}", response.status());
-                }
+                match reqwest::get(url).await {
+                    Ok(response) => {
+                        if response.status().is_success() {
+                            let mut file = File::create(filepath).await.unwrap();
+                            let content = response.bytes().await.unwrap();
+                            file.write_all(&content).await.unwrap();
+                        } else {
+                            println!("Failed to download file: {}", response.status());
+                            bpost.avatar_path = "avatar.png".to_string()
+                        }
+                    },
+                    Err(_) => {
+                        bpost.avatar_path = "avatar.png".to_string()
+                    }
+                };
+
             },
             "text" => {
                 bpost.text = String::from_utf8(data.to_vec()).unwrap();
