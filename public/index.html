@@ -64,7 +64,7 @@
         fetch(`${apiHost}/api/posts`).then((res) => {
             res.json().then((posts) => {
                 postsRoot.innerHTML = ''
-                posts.forEach((post) => {
+                posts.reverse().forEach((post) => {
                     postsRoot.innerHTML += `<article>
                         ${post.image_path ? `<img class="post" src="content/${post.image_path}" alt="Blog Post Image">` : ''}
                         <div>
