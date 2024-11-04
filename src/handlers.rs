@@ -1,20 +1,41 @@
 use std::sync::Arc;
 
-use tokio::fs::File;
+use tokio::{
+    fs::File,
+    io::AsyncWriteExt,
+};
 
 use axum::{
     Extension,
     Json,
     http::StatusCode,
+    extract::Multipart,
 };
 
-use axum::extract::Multipart;
-
 use sqlx::{query_as, Pool, Sqlite};
-use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
+use bytes::{Bytes};
+use image::{guess_format, ImageFormat};
+
 use crate::IMG_DIR;
 use crate::models::{BlogPost};
+
+fn is_png(b: Bytes) -> Result<Bytes, ()>{
+    let img = guess_format(b.clone().iter().as_slice());
+    match img {
+        Ok(img) => {
+            if img == ImageFormat::Png {
+                Ok(b)
+            } else {
+                Err(())
+            }
+        },
+        Err(_) => Err(()),
+    }
+}
+
+
+// === Handlers ===
 
 pub async fn get_all_posts(Extension(pool): Extension<Arc<Pool<Sqlite>>>) -> Json<Vec<BlogPost>> {
     let res = query_as
@@ -37,11 +58,6 @@ pub async fn create_new_post(
     while let Some(field) = multipart.next_field().await.unwrap() {
         let name = field.name().unwrap().to_string();
 
-        let file_ext = field
-            .file_name()
-            .and_then(|filename| filename.split('.').last())
-            .map(|ext| ext.to_string());
-
         let data = field.bytes().await.unwrap().clone();
         let img_uuid = Uuid::new_v4().to_string();
         let img_dir = IMG_DIR;
@@ -49,40 +65,51 @@ pub async fn create_new_post(
         match name.as_str() {
             "image" => {
                 if data.len() > 0 {
-                    let filename = format!("post_image_{}.{}", img_uuid, file_ext.unwrap());
+                    let filename = format!("post_image_{}.png", img_uuid);
                     let filepath = format!("{}/{}", img_dir, filename);
                     bpost.image_path = filename;
-
-                    match File::create(filepath).await {
-                        Ok(mut file) => match file.write_all(&data).await {
-                            Ok(_) => {},
-                            Err(_) => bpost.image_path = "".to_string(),
+                    // PNG Check
+                    match is_png(data) {
+                        Ok(data) => {
+                            // File create Check
+                            match File::create(filepath).await {
+                                // File write Check
+                                Ok(mut file) => match file.write_all(&data).await {
+                                    Ok(_) => {},
+                                    Err(_) => bpost.image_path = "".to_string(),
+                                },
+                                Err(_) => bpost.image_path = "".to_string(),
+                            }
                         },
                         Err(_) => bpost.image_path = "".to_string(),
                     }
-
                 }
             },
             "avatar_url" => {
-                let filename = format!("avatar_image_{}", img_uuid);
+                let filename = format!("avatar_image_{}.png", img_uuid);
                 let filepath = format!("{}/{}", img_dir, filename);
                 bpost.avatar_path = filename;
 
                 let url = String::from_utf8(data.to_vec()).unwrap();
+                // File download Check
                 match reqwest::get(url).await {
                     Ok(response) => {
                         if response.status().is_success() {
-                            let mut file = File::create(filepath).await.unwrap();
                             let content = response.bytes().await.unwrap();
-                            file.write_all(&content).await.unwrap();
+                            // PNG Check
+                            match is_png(content) {
+                                Ok(content) => {
+                                    let mut file = File::create(filepath).await.unwrap();
+                                    file.write_all(&content).await.unwrap();
+                                },
+                                Err(_) => bpost.avatar_path = "avatar.png".to_string(),
+                            }
                         } else {
                             println!("Failed to download file: {}", response.status());
                             bpost.avatar_path = "avatar.png".to_string()
                         }
                     },
-                    Err(_) => {
-                        bpost.avatar_path = "avatar.png".to_string()
-                    }
+                    Err(_) => bpost.avatar_path = "avatar.png".to_string(),
                 };
 
             },

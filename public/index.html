@@ -11,8 +11,9 @@
         fieldset { background: #fff; }
         article { border: 1px solid grey; margin: 5px 2px; padding: 5px; background: #fff; }
         form > div { display: flex; }
-        form > div:nth-child(2) { justify-content: center; padding-top: 20px; }
+        form > div:nth-child(3) { justify-content: center; padding-top: 20px; }
         form > div > fieldset { flex-grow: 1; }
+        form > span { font-size: 0.8em; display: block; text-align: center; }
         input, textarea { box-sizing: border-box; width: 100%; }
         article { min-height: 210px; }
         article > div { display: flex; column-gap: 10px; margin-bottom: 10px;  }
@@ -40,11 +41,12 @@
             <fieldset>
                 <legend>Post Data</legend>
                 <label for="image">Image</label> <br>
-                <input type="file" id="image" name="image" accept="image/*"> <br>
+                <input type="file" id="image" name="image" accept="image/png"> <br>
                 <label for="text">Content</label> <br>
                 <textarea id="text" name="text" rows="4" required></textarea> <br>
             </fieldset>
         </div>
+        <span>Allowed image types:&nbsp;<b>PNG</b></span>
         <div>
             <button type="submit">Submit New Post</button>
         </div>
